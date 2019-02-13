@@ -45,6 +45,7 @@ export default class App extends React.Component {
             console.log('Last selected timeslot:');
             console.log(lastSelected);
           } }
+          onMonthChange = { (month) => {console.log(month)}}
         />
       </div>
     );

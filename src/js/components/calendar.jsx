@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import CalendarJS from 'calendarjs';
 import Month from './month.jsx';
+import helpers from './../util/helpers';
 
 export default class Calendar extends React.Component {
   constructor(props) {
@@ -16,8 +17,20 @@ export default class Calendar extends React.Component {
     this.state = {
       currentDate: moment(props.initialDate),
       selectedTimeslots: [],
+      weeksStart: null,
+      weeksEnd: null,
     };
   }
+
+  componentDidUpdate( prevProps, prevState) {
+   
+    // console.log('weeksStart', this.state.weeksStart);
+    // console.log('weeksEnd', this.state.weeksEnd);
+    
+
+  }
+
+  _generateWeeks() {}
 
   render() {
     return (
@@ -51,6 +64,36 @@ export default class Calendar extends React.Component {
     );
   }
 
+  // _verifyWeeksChange( weeks ) {
+  //   const firstWeek = weeks[0];
+  //   const lastWeek = weeks[weeks.length -1 ];
+  //   const weeksStart = firstWeek[0];
+  //   const weeksEnd = lastWeek[ lastWeek.length - 1];
+  //   if(this.weeksEnd !== weeksEnd || this.weeksStart !== weeksStart ) {
+  //     this.weeksStart = weeksStart;
+  //     this.weeksEnd = weeksEnd;
+      
+  //     console.log('weeksStart', this.weeksStart);
+  //     console.log('weeksEnd', this.weeksEnd);
+  //   }
+  
+
+  // }
+
+  _onMonthChange(weeks) {
+    const startingWeek = weeks[0];
+    const endingWeek = weeks[weeks.length - 1];
+    const startDate = helpers.getMomentFromCalendarJSDateElement(startingWeek[0]);
+    const endDate = helpers.getMomentFromCalendarJSDateElement(endingWeek[endingWeek.length - 1]);
+
+    if ((!startDate.isSame(this.startDate) || !endDate.isSame(this.endDate)) && this.props.onMonthChange) {
+      this.startDate = startDate;
+      this.endDate = endDate;
+
+      this.props.onMonthChange({ startDate, endDate });
+    }
+  }
+
   _renderMonth() {
     const {
       currentDate,
@@ -60,10 +103,17 @@ export default class Calendar extends React.Component {
     const {
       timeslots,
       initialDate,
+      onMonthChange
     } = this.props;
 
     const cal = new CalendarJS(currentDate.year(), currentDate.month() + 1);
     const weeks = cal.generate();
+    this._onMonthChange(weeks);
+    // this._verifyWeeksChange(weeks);
+    // this.setState({
+    //   weeksStart: weeks[0],
+    //   weeksEnd: weeks[weeks.length - 1]
+    // });
 
     return (
       <Month
@@ -286,4 +336,5 @@ Calendar.propTypes = {
   startDateInputProps: PropTypes.object,
   endDateInputProps: PropTypes.object,
   onSelectTimeslot: PropTypes.func,
+  onMonthChange: PropTypes.func
 };
